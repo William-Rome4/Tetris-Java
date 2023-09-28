@@ -21,8 +21,8 @@ public class Cena implements GLEventListener{
         //dados iniciais da cena
         glu = new GLU();
         //Estabelece as coordenadas do SRU (Sistema de Referencia do Universo)
-        xMin = yMin = zMin = -8;
-        xMax = yMax = zMax = 8;
+        xMin = yMin = zMin = -15;
+        xMax = yMax = zMax = 15;
         num = 3;
         lower = angle = 0;
     }
@@ -82,12 +82,12 @@ public class Cena implements GLEventListener{
             gl.glPushMatrix();
                 gl.glColor3f(1,0.5f,0);
                 gl.glBegin(GL2.GL_POLYGON);
-                    gl.glVertex2f(1f, 0f);
-                    gl.glVertex2f(1f, -1f);
-                    gl.glVertex2f(0f, -1f);
-                    gl.glVertex2f(0f, 1f);
-                    gl.glVertex2f(3f, 1f);
-                    gl.glVertex2f(3f, 0f);
+                    gl.glVertex2f(0f, 7f);
+                    gl.glVertex2f(0f, 6f);
+                    gl.glVertex2f(-1f, 6f);
+                    gl.glVertex2f(-1f, 8f);
+                    gl.glVertex2f(2f, 8f);
+                    gl.glVertex2f(2f, 7f);
                 gl.glEnd();
             gl.glPopMatrix();
         }else if(num == 4){
@@ -103,9 +103,7 @@ public class Cena implements GLEventListener{
             gl.glEnd();
         };
 
-        
-
-        lower-=0.03f;
+        //lower-=0.03f;
 
         gl.glFlush();
     }
