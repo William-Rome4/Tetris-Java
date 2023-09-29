@@ -12,8 +12,8 @@ import com.jogamp.opengl.util.FPSAnimator;
  */
 public class Renderer {
     private static GLWindow window = null;
-    public static int screenWidth = 480;  //1280
-    public static int screenHeight = 480; //960 
+    public static int screenWidth = 800;
+    public static int screenHeight = 800; 
 
     //Cria a janela de rendeziração do JOGL
     public static void init(){        
@@ -26,15 +26,12 @@ public class Renderer {
         
         Cena cena = new Cena();
         
-        window.addGLEventListener(cena); //adiciona a Cena a Janela  
-        //Habilita o teclado : cena
+        window.addGLEventListener(cena);
         window.addKeyListener(new KeyBoard(cena));
         
-        //window.requestFocus();
         FPSAnimator animator = new FPSAnimator(window, 60);
-        animator.start(); //inicia o loop de animação
+        animator.start();
         
-        //encerrar a aplicacao adequadamente
         window.addWindowListener(new WindowAdapter() {
             @Override
             public void windowDestroyNotify(WindowEvent e) {

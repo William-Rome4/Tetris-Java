@@ -1,7 +1,7 @@
 package tetris;
 
-import java.lang.Thread;
 import java.util.Random;
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -12,130 +12,155 @@ import com.jogamp.opengl.glu.GLU;
  */
 public class Cena implements GLEventListener{    
     private float xMin, xMax, yMin, yMax, zMin, zMax;
-
-    public float angle, moveX, moveY, lower, num;
+    public float angle, moveX, lower, num;
+    // TODO private int[][] gameBoard;
+    boolean rotE, rotQ;
+    int[][] lblock = {{1, 0},{1, 0},{1, 1}};
+    int[][] lreverse = {{0, 1},{0, 1},{1, 1}};
+    int[][] tblock = {{0, 1},{1, 1},{0, 1}};
+    int[][] line = {{0, 1},{0, 1},{0, 1},{0, 1}};
+    int[][] square = {{1, 1},{1, 1}};
+    int[][] squiggly = {{1, 0},{1, 1},{0, 1}};
+    int[][] rsquiggly = {{0, 1},{1, 1},{1, 0}};
+    Tetromino piece;
+    Random rn = new Random();
     GLU glu;
         
     @Override
     public void init(GLAutoDrawable drawable) {
-        //dados iniciais da cena
         glu = new GLU();
         //Estabelece as coordenadas do SRU (Sistema de Referencia do Universo)
-        xMin = yMin = zMin = -15;
-        xMax = yMax = zMax = 15;
-        num = 3;
-        lower = angle = 0;
+        xMin = yMin = zMin = -8;
+        xMax = yMax = zMax = 8;
+        lower = num = angle = 0;
+        piece = new Tetromino(-1, 5, line, "line");
     }
 
     @Override
     public void display(GLAutoDrawable drawable) {  
-        //obtem o contexto Opengl
-        GL2 gl = drawable.getGL().getGL2();                
-        //define a cor da janela (R, G, G, alpha)
+        GL2 gl = drawable.getGL().getGL2();       
         gl.glClearColor(0, 0, 0, 0);
-        //limpa a janela com a cor especificada
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT);       
-        gl.glLoadIdentity(); //lê a matriz identidade
+        gl.glLoadIdentity(); 
         
-        /*
-            desenho da cena
-        */
-        //Random rn = new Random();
-        //int num = rn.nextInt(7) + 1;
-        //System.out.println(num);
+        // Randomizador de peças
+        int num = rn.nextInt(7) + 1;
 
-        gl.glColor3f(1,0,0);
-        gl.glBegin(GL2.GL_LINES);
-            gl.glVertex2f(-8,-7.99f);
-            gl.glVertex2f(8,-7.99f);
-        gl.glEnd();
-
-        gl.glTranslatef(0,lower,0);
-        gl.glTranslatef(moveX,moveY,0);
-        gl.glRotatef(angle,0.0f,0.0f,1.0f);
-        if(num == 1){
-            //Tetris Stick
-            gl.glPushMatrix();
-                gl.glColor3f(0,1,1);
-                gl.glBegin(GL2.GL_POLYGON);
-                    gl.glVertex2f(0f, 0f);
-                    gl.glVertex2f(4f, 0f);
-                    gl.glVertex2f(4f, 1f);
-                    gl.glVertex2f(0f, 1f);
-                gl.glEnd();
-            gl.glPopMatrix();
-        }else if(num == 2){
-            //Tetris Reverse 'L'
-            gl.glPushMatrix();
-                gl.glColor3f(0,0,1);
-                gl.glBegin(GL2.GL_POLYGON);
-                    gl.glVertex2f(1f, 1f);
-                    gl.glVertex2f(1f, 2f);
-                    gl.glVertex2f(0f, 2f);
-                    gl.glVertex2f(0f, 0f);
-                    gl.glVertex2f(3f, 0f);
-                    gl.glVertex2f(3f, 1f);
-                gl.glEnd();
-            gl.glPopMatrix();
-        }else if(num == 3){
-            //Tetris 'L'
-            gl.glPushMatrix();
-                gl.glColor3f(1,0.5f,0);
-                gl.glBegin(GL2.GL_POLYGON);
-                    gl.glVertex2f(0f, 7f);
-                    gl.glVertex2f(0f, 6f);
-                    gl.glVertex2f(-1f, 6f);
-                    gl.glVertex2f(-1f, 8f);
-                    gl.glVertex2f(2f, 8f);
-                    gl.glVertex2f(2f, 7f);
-                gl.glEnd();
-            gl.glPopMatrix();
-        }else if(num == 4){
-            //Tetris 'L'
-            gl.glColor3f(1,0.5f,0);
-            gl.glBegin(GL2.GL_POLYGON);
-                gl.glVertex2f(1f, 0f);
-                gl.glVertex2f(1f, -1f);
-                gl.glVertex2f(0f, -1f);
-                gl.glVertex2f(0f, 1f);
-                gl.glVertex2f(4f, 1f);
-                gl.glVertex2f(4f, 0f);
-            gl.glEnd();
-        };
-
-        //lower-=0.03f;
+        //System.out.println(piece.getY());
+        if(piece.getY() <= -7.99f){
+            // Inicializando a próxima peça após atingir o fundo
+            switch (num) {
+                case 1: piece = new Tetromino(-1, 5, lblock, "lblock");break;
+                case 2: piece = new Tetromino(-1, 5, lreverse, "lreverse");break;
+                case 3: piece = new Tetromino(-1, 5, line, "line");break;
+                case 4: piece = new Tetromino(-1, 5, squiggly, "squiggly");break;
+                case 5: piece = new Tetromino(-1, 5, rsquiggly, "rsquiggly");break;
+                case 6: piece = new Tetromino(-1, 5, tblock, "tblock");break;
+                default: piece = new Tetromino(-1, 5, square, "square");break;
+            }
+        }
+        
+        drawTetronimo(gl, piece);
 
         gl.glFlush();
     }
 
+    private void drawTetronimo(GL2 gl, Tetromino piece){
+        float x = piece.getX();
+        float y = piece.getY();
+        int[][] body = piece.getBody();
+
+        gl.glPushMatrix();
+            // Translação para gerenciar a movimentação das peças
+            gl.glTranslatef(x+moveX, y, 0);
+            if(rotE)
+                piece.setBody(rotateE(piece)); rotE = false;
+            if(rotQ)
+                piece.setBody(rotateQ(piece)); rotQ = false;
+            gl.glBegin(GL2.GL_QUADS);
+
+            for (int row = 0; row < body.length; row++) {
+                for (int col = 0; col < body[row].length; col++) {
+                    if (body[row][col] == 1) {
+                        float blockX = col;
+                        float blockY = row;
+                        // Colorindo as peças
+                        switch (piece.getName()) {
+                            case "lblock": gl.glColor3f(0.0f,0.0f,0.5f); break;
+                            case "lreverse": gl.glColor3f(1,0.5f,0); break;
+                            case "tblock": gl.glColor3f(1,0.0f,1); break;
+                            case "line": gl.glColor3f(0.0f,1f,1f);break;
+                            case "square": gl.glColor3f(1f,1f,0f);break;
+                            case "squiggly": gl.glColor3f(1f,0f,0f);break;
+                            case "rsquiggly": gl.glColor3f(0f,1f,0f);break;
+                            default: break;
+                        }
+                        // "Imprime" a peça de acordo com a matriz definida para o valor do Tetronimo.body
+                        gl.glVertex2f(blockX, blockY);
+                        gl.glVertex2f(blockX + 1, blockY);
+                        gl.glVertex2f(blockX + 1, blockY + 1);
+                        gl.glVertex2f(blockX, blockY + 1);
+                    }
+                }
+            }
+            gl.glEnd();
+
+            // Lógica para descer a posição das peças ao decorrer do jogo
+            if(piece.getY() > -7.99f)
+                piece.setY(y-=0.04f);
+            else
+                piece.setY(-7.99f);
+
+            gl.glPopMatrix();
+    }
+
+    // Rotação em sentido Anti-horário
+    public int[][] rotateQ(Tetromino piece){
+        int[][] body = piece.getBody();
+        int rows = body.length;
+        int cols = body[0].length;
+        int[][] rotated = new int[cols][rows];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                rotated[j][rows - 1 - i] = body[i][j];
+            }
+        }
+        return rotated;
+    }
+
+    // Rotação em sentido Horário
+    public int[][] rotateE(Tetromino piece){
+        int[][] body = piece.getBody();
+        int rows = body.length;
+        int cols = body[0].length;
+        int[][] rotated = new int[cols][rows];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                rotated[cols - 1 - j][i] = body[i][j];
+            }
+        }
+        return rotated;
+    }
+
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {    
-        //obtem o contexto grafico Opengl
         GL2 gl = drawable.getGL().getGL2();  
         
-        //evita a divisão por zero
         if(height == 0) height = 1;
-        //calcula a proporção da janela (aspect ratio) da nova janela
         float aspect = (float) width / height;
-        
-        //seta o viewport para abranger a janela inteira
         gl.glViewport(0, 0, width, height);
-                
-        //ativa a matriz de projeção
         gl.glMatrixMode(GL2.GL_PROJECTION);      
-        gl.glLoadIdentity(); //lê a matriz identidade
-        
-        //Projeção ortogonal
-        //true:   aspect >= 1 configura a altura de -1 para 1 : com largura maior
-        //false:  aspect < 1 configura a largura de -1 para 1 : com altura maior
+        gl.glLoadIdentity(); 
+
         if(width >= height)            
             gl.glOrtho(xMin * aspect, xMax * aspect, yMin, yMax, zMin, zMax);
         else        
             gl.glOrtho(xMin, xMax, yMin / aspect, yMax / aspect, zMin, zMax);
                 
-        //ativa a matriz de modelagem
         gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glLoadIdentity(); //lê a matriz identidade
+        gl.glLoadIdentity();
         System.out.println("Reshape: " + width + ", " + height);
     }    
        
