@@ -1,5 +1,6 @@
 package tetris;
 
+import java.util.ArrayList;
 import java.util.Random;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
@@ -12,8 +13,8 @@ import com.jogamp.opengl.glu.GLU;
  */
 public class Cena implements GLEventListener{    
     private float xMin, xMax, yMin, yMax, zMin, zMax;
-    public float angle, moveX, lower, num;
-    // TODO private int[][] gameBoard;
+    public float angle, lower, num;
+    private int[][] gameBoard;
     boolean rotE, rotQ;
     int[][] lblock = {{1, 0},{1, 0},{1, 1}};
     int[][] lreverse = {{0, 1},{0, 1},{1, 1}};
@@ -23,6 +24,7 @@ public class Cena implements GLEventListener{
     int[][] squiggly = {{1, 0},{1, 1},{0, 1}};
     int[][] rsquiggly = {{0, 1},{1, 1},{1, 0}};
     Tetromino piece;
+    ArrayList<Tetromino> pieces = new ArrayList<Tetromino>();
     Random rn = new Random();
     GLU glu;
         
@@ -34,6 +36,13 @@ public class Cena implements GLEventListener{
         xMax = yMax = zMax = 8;
         lower = num = angle = 0;
         piece = new Tetromino(-1, 5, line, "line");
+        // Uma provável maneira de mapear as peças
+        /* gameBoard = new int[16][16];
+        for (int row = 0; row < 16; row++) {
+            for (int col = 0; col < 16; col++) {
+                gameBoard[row][col] = 0;
+            }
+        } */
     }
 
     @Override
@@ -43,11 +52,14 @@ public class Cena implements GLEventListener{
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT);       
         gl.glLoadIdentity(); 
         
+        drawGameNow(gl, pieces);
+
         // Randomizador de peças
         int num = rn.nextInt(7) + 1;
 
-        //System.out.println(piece.getY());
         if(piece.getY() <= -7.99f){
+            // Adicionando a peça na lista, para mapear a posição atual do jogo
+            pieces.add(piece);
             // Inicializando a próxima peça após atingir o fundo
             switch (num) {
                 case 1: piece = new Tetromino(-1, 5, lblock, "lblock");break;
@@ -72,7 +84,7 @@ public class Cena implements GLEventListener{
 
         gl.glPushMatrix();
             // Translação para gerenciar a movimentação das peças
-            gl.glTranslatef(x+moveX, y, 0);
+            gl.glTranslatef(x, y, 0);
             if(rotE)
                 piece.setBody(rotateE(piece)); rotE = false;
             if(rotQ)
@@ -110,8 +122,46 @@ public class Cena implements GLEventListener{
                 piece.setY(y-=0.04f);
             else
                 piece.setY(-7.99f);
+            
 
             gl.glPopMatrix();
+    }
+
+    private void drawGameNow(GL2 gl, ArrayList<Tetromino> pieces) {
+        for (Tetromino piece : pieces) {
+            float x = piece.getX();
+            float y = piece.getY();
+            int[][] body = piece.getBody();
+            gl.glPushMatrix();
+                gl.glTranslatef(x, y, 0);
+                gl.glBegin(GL2.GL_QUADS);
+                for (int row = 0; row < body.length; row++) {
+                    for (int col = 0; col < body[row].length; col++) {
+                        if (body[row][col] == 1) {
+                            float blockX = col;
+                            float blockY = row;
+                            // Colorindo as peças
+                            switch (piece.getName()) {
+                                case "lblock": gl.glColor3f(0.0f,0.0f,0.5f); break;
+                                case "lreverse": gl.glColor3f(1,0.5f,0); break;
+                                case "tblock": gl.glColor3f(1,0.0f,1); break;
+                                case "line": gl.glColor3f(0.0f,1f,1f);break;
+                                case "square": gl.glColor3f(1f,1f,0f);break;
+                                case "squiggly": gl.glColor3f(1f,0f,0f);break;
+                                case "rsquiggly": gl.glColor3f(0f,1f,0f);break;
+                                default: break;
+                            }
+                            // "Imprime" a peça de acordo com a matriz definida para o valor do Tetronimo.body
+                            gl.glVertex2f(blockX, blockY);
+                            gl.glVertex2f(blockX + 1, blockY);
+                            gl.glVertex2f(blockX + 1, blockY + 1);
+                            gl.glVertex2f(blockX, blockY + 1);
+                        }
+                    }
+                }
+                gl.glEnd();
+            gl.glPopMatrix();
+        }
     }
 
     // Rotação em sentido Anti-horário

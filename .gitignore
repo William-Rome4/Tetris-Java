@@ -2,7 +2,7 @@
 *.class
 
 # Package files
-*.jar
+#*.jar
 *.war
 *.ear
 
