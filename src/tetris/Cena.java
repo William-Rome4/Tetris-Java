@@ -14,8 +14,7 @@ import com.jogamp.opengl.glu.GLU;
 public class Cena implements GLEventListener{    
     private float xMin, xMax, yMin, yMax, zMin, zMax;
     public float angle, lower, num;
-    private int[][] gameBoard;
-    boolean rotE, rotQ;
+    boolean rotE, rotQ, stop;
     int[][] lblock = {{1, 0},{1, 0},{1, 1}};
     int[][] lreverse = {{0, 1},{0, 1},{1, 1}};
     int[][] tblock = {{0, 1},{1, 1},{0, 1}};
@@ -25,6 +24,8 @@ public class Cena implements GLEventListener{
     int[][] rsquiggly = {{0, 1},{1, 1},{1, 0}};
     Tetromino piece;
     ArrayList<Tetromino> pieces = new ArrayList<Tetromino>();
+    ArrayList<Float> limitsX = new ArrayList<Float>();
+    ArrayList<Float> limitsY = new ArrayList<Float>();
     Random rn = new Random();
     GLU glu;
         
@@ -35,14 +36,9 @@ public class Cena implements GLEventListener{
         xMin = yMin = zMin = -8;
         xMax = yMax = zMax = 8;
         lower = num = angle = 0;
+        stop = false;
+        limitsX.add(8f);limitsY.add(8f);
         piece = new Tetromino(-1, 5, line, "line");
-        // Uma provável maneira de mapear as peças
-        /* gameBoard = new int[16][16];
-        for (int row = 0; row < 16; row++) {
-            for (int col = 0; col < 16; col++) {
-                gameBoard[row][col] = 0;
-            }
-        } */
     }
 
     @Override
@@ -51,24 +47,36 @@ public class Cena implements GLEventListener{
         gl.glClearColor(0, 0, 0, 0);
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT);       
         gl.glLoadIdentity(); 
-        
-        drawGameNow(gl, pieces);
 
         // Randomizador de peças
         int num = rn.nextInt(7) + 1;
 
-        if(piece.getY() <= -7.99f){
-            // Adicionando a peça na lista, para mapear a posição atual do jogo
-            pieces.add(piece);
-            // Inicializando a próxima peça após atingir o fundo
-            switch (num) {
-                case 1: piece = new Tetromino(-1, 5, lblock, "lblock");break;
-                case 2: piece = new Tetromino(-1, 5, lreverse, "lreverse");break;
-                case 3: piece = new Tetromino(-1, 5, line, "line");break;
-                case 4: piece = new Tetromino(-1, 5, squiggly, "squiggly");break;
-                case 5: piece = new Tetromino(-1, 5, rsquiggly, "rsquiggly");break;
-                case 6: piece = new Tetromino(-1, 5, tblock, "tblock");break;
-                default: piece = new Tetromino(-1, 5, square, "square");break;
+        drawGameNow(gl, pieces);
+
+        for(int i=0;i<limitsX.size();i++){
+            float x = limitsX.get(i);
+            float y = limitsY.get(i);
+            if(piece.getName() == "line"){
+                y = y + 4f;
+            } else if(piece.getName() == "square"){
+                y = y + 2f;
+            } else {
+                y = y + 3f;
+            }
+            if(piece.getY() <= -7.99f || (int)piece.getY() == (int)y && (int)piece.getX() == (int)x) {
+                // Adicionando a peça na lista, para mapear a posição atual do jogo
+                pieces.add(piece);
+                // Inicializando a próxima peça após atingir o fundo
+                switch (num) {
+                    case 1: piece = new Tetromino(-1, 5, lblock, "lblock");break;
+                    case 2: piece = new Tetromino(-1, 5, lreverse, "lreverse");break;
+                    case 3: piece = new Tetromino(-1, 5, line, "line");break;
+                    case 4: piece = new Tetromino(-1, 5, squiggly, "squiggly");break;
+                    case 5: piece = new Tetromino(-1, 5, rsquiggly, "rsquiggly");break;
+                    case 6: piece = new Tetromino(-1, 5, tblock, "tblock");break;
+                    default: piece = new Tetromino(-1, 5, square, "square");break;
+                }
+                break;
             }
         }
         
@@ -121,7 +129,7 @@ public class Cena implements GLEventListener{
             if(piece.getY() > -7.99f)
                 piece.setY(y-=0.04f);
             else
-                piece.setY(-7.99f);
+                piece.setY(-8f);
             
 
             gl.glPopMatrix();
@@ -131,6 +139,8 @@ public class Cena implements GLEventListener{
         for (Tetromino piece : pieces) {
             float x = piece.getX();
             float y = piece.getY();
+            limitsX.add(x);
+            limitsY.add(y);
             int[][] body = piece.getBody();
             gl.glPushMatrix();
                 gl.glTranslatef(x, y, 0);

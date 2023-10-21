@@ -20,15 +20,15 @@ public class KeyBoard implements KeyListener{
             System.exit(0);
         if(e.getKeyChar() == 'a' || e.getKeyCode() == 149){
             if(cena.piece.getName() == "line" && cena.piece.getX() > -8.99f){
-                cena.piece.setX(cena.piece.getX()-0.5f);
+                cena.piece.setX(cena.piece.getX()-1f);
             }
             else if(cena.piece.getX() > -7.99f){
-                cena.piece.setX(cena.piece.getX()-0.5f);
+                cena.piece.setX(cena.piece.getX()-1f);
             }
         }
         if(e.getKeyChar() == 'd' || e.getKeyCode() == 151){
             if(cena.piece.getX() < 5.99f){
-                cena.piece.setX(cena.piece.getX()+0.5f);
+                cena.piece.setX(cena.piece.getX()+1f);
             }
         }
         if(e.getKeyChar() == 's' || e.getKeyCode() == 152)
